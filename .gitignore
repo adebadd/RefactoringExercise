@@ -36,3 +36,4 @@ out/
 bin/EmployeeDetails$1.class
 /bin
 /bin
+*.class

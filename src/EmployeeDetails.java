@@ -44,6 +44,7 @@ import javax.swing.event.DocumentListener;
 import net.miginfocom.swing.MigLayout;
 import java.io.File;
 
+
 public class EmployeeDetails extends JFrame implements ActionListener, ItemListener, DocumentListener, WindowListener {
 	// decimal format for inactive currency text field
 	private static final DecimalFormat format = new DecimalFormat("\u20ac ###,###,##0.00");
@@ -66,6 +67,10 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 	String[] gender = { "", "M", "F" };
 	String[] department = { "", "Administration", "Production", "Transport", "Management" };
 	String[] fullTime = { "", "Yes", "No" };
+
+    public FileManager getFileManager() {
+        return fileManager;
+    }
 
 	// initialize menu bar
 	private JMenuBar menuBar() {
