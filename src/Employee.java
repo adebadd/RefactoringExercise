@@ -14,7 +14,7 @@ public class Employee{
 	private double salary;
 	private boolean fullTime;
 
-	// Create Employee with no details
+	// Create Employee with no details	
 	public Employee() {
 		this.employeeId = 0;
 		this.pps = "";
