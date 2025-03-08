@@ -4,7 +4,7 @@
  * 
  * */
 
-public class Employee{
+public class Employee {
 	private int employeeId;
 	private String pps;
 	private String surname;
@@ -39,7 +39,6 @@ public class Employee{
 		this.fullTime = fullTime;
 	}// end Employee with details
 
-	// Getter methods
 	public int getEmployeeId() {
 		return this.employeeId;
 	}
@@ -72,7 +71,6 @@ public class Employee{
 		return this.fullTime;
 	}
 
-	// Setter methods
 	public void setEmployeeId(int employeeId) {
 		this.employeeId = employeeId;
 	}
@@ -105,7 +103,6 @@ public class Employee{
 		this.fullTime = fullTime;
 	}
 
-	// Display Employee details
 	public String toString() {
 		String bool = "";
 		if (fullTime)
@@ -117,4 +114,70 @@ public class Employee{
 				+ "\nFirst Name: " + this.firstName + "\nGender: " + this.gender + "\nDepartment: " + this.department + "\nSalary: " + this.salary
 				+ "\nFull Time: " + bool;
 	}// end toString
+
+	public static class Builder {
+		private int employeeId;
+		private String pps;
+		private String surname;
+		private String firstName;
+		private char gender;
+		private String department;
+		private double salary;
+		private boolean fullTime;
+
+		public Builder setEmployeeId(int employeeId) {
+			this.employeeId = employeeId;
+			return this;
+		}
+
+		public Builder setPps(String pps) {
+			this.pps = pps;
+			return this;
+		}
+
+		public Builder setSurname(String surname) {
+			this.surname = surname;
+			return this;
+		}
+
+		public Builder setFirstName(String firstName) {
+			this.firstName = firstName;
+			return this;
+		}
+
+		public Builder setGender(char gender) {
+			this.gender = gender;
+			return this;
+		}
+
+		public Builder setDepartment(String department) {
+			this.department = department;
+			return this;
+		}
+
+		public Builder setSalary(double salary) {
+			this.salary = salary;
+			return this;
+		}
+
+		public Builder setFullTime(boolean fullTime) {
+			this.fullTime = fullTime;
+			return this;
+		}
+
+		public Employee build() {
+			return new Employee(this);
+		}
+	}
+
+	private Employee(Builder builder) {
+		this.employeeId = builder.employeeId;
+		this.pps = builder.pps;
+		this.surname = builder.surname;
+		this.firstName = builder.firstName;
+		this.gender = builder.gender;
+		this.department = builder.department;
+		this.salary = builder.salary;
+		this.fullTime = builder.fullTime;
+	}
 }// end class Employee
