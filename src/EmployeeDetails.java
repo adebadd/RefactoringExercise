@@ -19,7 +19,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.text.DecimalFormat;
-import java.util.Random;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
@@ -44,11 +45,8 @@ import javax.swing.event.DocumentListener;
 import net.miginfocom.swing.MigLayout;
 import java.io.File;
 
-
 public class EmployeeDetails extends JFrame implements ActionListener, ItemListener, DocumentListener, WindowListener {
-	// decimal format for inactive currency text field
 	private static final DecimalFormat format = new DecimalFormat("\u20ac ###,###,##0.00");
-	// decimal format for active currency text field
 	private static final DecimalFormat fieldFormat = new DecimalFormat("0.00");
 	private long currentByteStart = 0;
 	private FileManager fileManager = new FileManager();
@@ -67,12 +65,12 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 	String[] gender = { "", "M", "F" };
 	String[] department = { "", "Administration", "Production", "Transport", "Management" };
 	String[] fullTime = { "", "Yes", "No" };
+	private Map<Object, Command> commandMap = new HashMap<>();
 
     public FileManager getFileManager() {
         return fileManager;
     }
 
-	// initialize menu bar
 	private JMenuBar menuBar() {
 		JMenuBar menuBar = new JMenuBar();
 		JMenu fileMenu = new JMenu("File");
@@ -125,9 +123,8 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		closeApp.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, ActionEvent.CTRL_MASK));
 
 		return menuBar;
-	} // end menuBar
+	}
 
-	// initialize search panel
 	private JPanel searchPanel() {
 		JPanel searchPanel = new JPanel(new MigLayout());
 		searchPanel.setBorder(BorderFactory.createTitledBorder("Search"));
@@ -148,12 +145,10 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		searchSurname.setToolTipText("Search Employee By Surname");
 
 		return searchPanel;
-	} // end searchPanel
+	}
 
-	// initialize navigation panel
 	private JPanel navigPanel() {
 		JPanel navigPanel = new JPanel();
-
 		navigPanel.setBorder(BorderFactory.createTitledBorder("Navigate"));
 		navigPanel.add(first = new JButton(new ImageIcon(
 				new ImageIcon("first.png").getImage().getScaledInstance(17, 17, java.awt.Image.SCALE_SMOOTH))));
@@ -180,11 +175,10 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		last.setToolTipText("Display last Record");
 
 		return navigPanel;
-	} // end naviPanel
+	}
 
 	private JPanel buttonPanel() {
 		JPanel buttonPanel = new JPanel();
-
 		buttonPanel.add(add = new JButton("Add Record"), "growx, pushx");
 		add.addActionListener(this);
 		add.setToolTipText("Add new Employee Record");
@@ -197,43 +191,31 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		buttonPanel.add(displayAll = new JButton("List all Records"), "growx, pushx");
 		displayAll.addActionListener(this);
 		displayAll.setToolTipText("List all Registered Employees");
-
 		return buttonPanel;
-	} // end buttonPanel
+	}
 
-	// initialize main/details panel
 	private JPanel detailsPanel() {
 		JPanel empDetails = new JPanel(new MigLayout());
 		JPanel buttonPanel = new JPanel();
 		JTextField field;
-
 		empDetails.setBorder(BorderFactory.createTitledBorder("Employee Details"));
-
 		empDetails.add(new JLabel("ID:"), "growx, pushx");
 		empDetails.add(idField = new JTextField(20), "growx, pushx, wrap");
 		idField.setEditable(false);
-
 		empDetails.add(new JLabel("PPS Number:"), "growx, pushx");
 		empDetails.add(ppsField = new JTextField(20), "growx, pushx, wrap");
-
 		empDetails.add(new JLabel("Surname:"), "growx, pushx");
 		empDetails.add(surnameField = new JTextField(20), "growx, pushx, wrap");
-
 		empDetails.add(new JLabel("First Name:"), "growx, pushx");
 		empDetails.add(firstNameField = new JTextField(20), "growx, pushx, wrap");
-
 		empDetails.add(new JLabel("Gender:"), "growx, pushx");
 		empDetails.add(genderCombo = new JComboBox<>(gender), "growx, pushx, wrap");
-
 		empDetails.add(new JLabel("Department:"), "growx, pushx");
 		empDetails.add(departmentCombo = new JComboBox<>(department), "growx, pushx, wrap");
-
 		empDetails.add(new JLabel("Salary:"), "growx, pushx");
 		empDetails.add(salaryField = new JTextField(20), "growx, pushx, wrap");
-
 		empDetails.add(new JLabel("Full Time:"), "growx, pushx");
 		empDetails.add(fullTimeCombo = new JComboBox<>(fullTime), "growx, pushx, wrap");
-
 		buttonPanel.add(saveChange = new JButton("Save"));
 		saveChange.addActionListener(this);
 		saveChange.setVisible(false);
@@ -242,10 +224,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		cancelChange.addActionListener(this);
 		cancelChange.setVisible(false);
 		cancelChange.setToolTipText("Cancel edit");
-
 		empDetails.add(buttonPanel, "span 2,growx, pushx,wrap");
-
-		// loop through panel components and add fonts/listeners
 		for (int i = 0; i < empDetails.getComponentCount(); i++) {
 			empDetails.getComponent(i).setFont(font1);
 			if (empDetails.getComponent(i) instanceof JTextField) {
@@ -269,7 +248,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			}
 		}
 		return empDetails;
-	} // end detailsPanel
+	}
 
 	public void displayRecords(Employee e) {
 		int gCount = 0;
@@ -309,43 +288,43 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			}
 		}
 		change = false;
-	} // end displayRecords
+	}
 
 	private void handleOpenAction() {
 		fileManager.openFile(this);
-	} // end handleOpenAction
+	}
 
 	private void handleSaveAction() {
 		if (checkInput() && !checkForChanges()) {
 			fileManager.saveFile(this);
 			change = false;
 		}
-	} // end handleSaveAction
+	}
 
 	private void handleSaveAsAction() {
 		if (checkInput() && !checkForChanges()) {
 			fileManager.saveFileAs(this);
 			change = false;
 		}
-	} // end handleSaveAsAction
+	}
 
 	private void handleExitAction() {
 		if (checkInput() && !checkForChanges()) {
 			fileManager.exitApp(this);
 		}
-	} // end handleExitAction
+	}
 
 	private void handleSearchByIdAction() {
 		if (checkInput() && !checkForChanges()) {
 			new SearchByIdDialog(EmployeeDetails.this);
 		}
-	} // end handleSearchByIdAction
+	}
 
 	private void handleSearchBySurnameAction() {
 		if (checkInput() && !checkForChanges()) {
 			new SearchBySurnameDialog(EmployeeDetails.this);
 		}
-	} // end handleSearchBySurnameAction
+	}
 
 	private void handleListAllAction() {
 		if (checkInput() && !checkForChanges()) {
@@ -353,57 +332,34 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 				new EmployeeSummaryDialog(getAllEmloyees());
 			}
 		}
-	} // end handleListAllAction
+	}
 
 	private void handleCreateRecordAction() {
 		if (checkInput() && !checkForChanges()) {
 			new AddRecordDialog(this);
 		}
-	} // end handleCreateRecordAction
+	}
 
 	private void handleEditRecordAction() {
 		if (checkInput() && !checkForChanges()) {
 			editDetails();
 		}
-	} // end handleEditRecordAction
+	}
 
 	private void handleDeleteRecordAction() {
 		if (checkInput() && !checkForChanges()) {
 			deleteRecord();
 		}
-	} // end handleDeleteRecordAction
-
-	private void handleFirstRecordAction() {
-		if (checkInput() && !checkForChanges()) {
-			firstRecord();
-			displayRecords(currentEmployee);
-		}
-	} // end handleFirstRecordAction
-
-	private void handlePrevRecordAction() {
-		if (checkInput() && !checkForChanges()) {
-			previousRecord();
-			displayRecords(currentEmployee);
-		}
-	} // end handlePrevRecordAction
-
-	private void handleNextRecordAction() {
-		if (checkInput() && !checkForChanges()) {
-			nextRecord();
-			displayRecords(currentEmployee);
-		}
-	} // end handleNextRecordAction
-
-	private void handleLastRecordAction() {
-		if (checkInput() && !checkForChanges()) {
-			lastRecord();
-			displayRecords(currentEmployee);
-		}
-	} // end handleLastRecordAction
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == closeApp) {
+		Command command = commandMap.get(e.getSource());
+		if (command != null) {
+			if (checkInput() && !checkForChanges()) {
+				command.execute();
+			}
+		} else if (e.getSource() == closeApp) {
 			handleExitAction();
 		} else if (e.getSource() == open) {
 			handleOpenAction();
@@ -424,14 +380,6 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			}
 		} else if (e.getSource() == cancelChange) {
 			cancelChange();
-		} else if (e.getSource() == firstItem || e.getSource() == first) {
-			handleFirstRecordAction();
-		} else if (e.getSource() == prevItem || e.getSource() == previous) {
-			handlePrevRecordAction();
-		} else if (e.getSource() == nextItem || e.getSource() == next) {
-			handleNextRecordAction();
-		} else if (e.getSource() == lastItem || e.getSource() == last) {
-			handleLastRecordAction();
 		} else if (e.getSource() == listAll || e.getSource() == displayAll) {
 			handleListAllAction();
 		} else if (e.getSource() == create || e.getSource() == add) {
@@ -445,27 +393,27 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 				new SearchBySurnameDialog(this);
 			}
 		}
-	} // end actionPerformed
+	}
 
 	public long getCurrentByteStart() {
 		return currentByteStart;
-	} // end getCurrentByteStart
+	}
 
 	public boolean isChange() {
 		return change;
-	} // end isChange
+	}
 
 	public void setCurrentEmployee(Employee e) {
 		currentEmployee = e;
-	} // end setCurrentEmployee
+	}
 
 	public Employee getCurrentEmployee() {
 		return currentEmployee;
-	} // end getCurrentEmployee
+	}
 
 	public JTextField getIdField() {
 		return idField;
-	} // end getIdField
+	}
 
 	public Employee getChangedDetails() {
 		boolean ft = false;
@@ -476,7 +424,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 				surnameField.getText().toUpperCase(), firstNameField.getText().toUpperCase(),
 				genderCombo.getSelectedItem().toString().charAt(0), departmentCombo.getSelectedItem().toString(),
 				Double.parseDouble(salaryField.getText()), ft);
-	} // end getChangedDetails
+	}
 
 	public boolean checkFileName(File f) {
 		boolean check = false;
@@ -486,7 +434,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			check = true;
 		}
 		return check;
-	} // end checkFileName
+	}
 
 	private boolean checkForChanges() {
 		boolean anyChanges = false;
@@ -498,7 +446,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			displayRecords(currentEmployee);
 		}
 		return anyChanges;
-	} // end checkForChanges
+	}
 
 	private void saveChanges() {
 		int returnVal = JOptionPane.showOptionDialog(this, "Do you want to save changes to current Employee?", "Save",
@@ -512,7 +460,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		}
 		displayRecords(currentEmployee);
 		setEnabled(false);
-	} // end saveChanges
+	}
 
 	private boolean checkInput() {
 		boolean valid = true;
@@ -563,7 +511,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			setToWhite();
 		}
 		return valid;
-	} // end checkInput
+	}
 
 	private void setToWhite() {
 		ppsField.setBackground(UIManager.getColor("TextField.background"));
@@ -573,7 +521,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		genderCombo.setBackground(UIManager.getColor("TextField.background"));
 		departmentCombo.setBackground(UIManager.getColor("TextField.background"));
 		fullTimeCombo.setBackground(UIManager.getColor("TextField.background"));
-	} // end setToWhite
+	}
 
 	public boolean correctPps(String pps, long currentByte) {
 		boolean ppsExist = false;
@@ -592,7 +540,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			ppsExist = true;
 		}
 		return ppsExist;
-	} // end correctPPS
+	}
 
 	public void firstRecord() {
 		if (isSomeoneToDisplay()) {
@@ -604,7 +552,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 				nextRecord();
 			}
 		}
-	} // end firstRecord
+	}
 
 	public void previousRecord() {
 		if (isSomeoneToDisplay()) {
@@ -617,7 +565,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			}
 			fileManager.getApplication().closeReadFile();
 		}
-	} // end previousRecord
+	}
 
 	public void nextRecord() {
 		if (isSomeoneToDisplay()) {
@@ -630,7 +578,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			}
 			fileManager.getApplication().closeReadFile();
 		}
-	} // end nextRecord
+	}
 
 	public void lastRecord() {
 		if (isSomeoneToDisplay()) {
@@ -642,7 +590,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 				previousRecord();
 			}
 		}
-	} // end lastRecord
+	}
 
 	public void searchEmployeeById() {
 		boolean found = false;
@@ -677,7 +625,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		}
 		searchByIdField.setBackground(Color.WHITE);
 		searchByIdField.setText("");
-	} // end searchEmployeeByID
+	}
 
 	public void searchEmployeeBySurname() {
 		boolean found = false;
@@ -686,13 +634,15 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			String firstSurname = currentEmployee.getSurname().trim();
 			if (searchBySurnameField.getText().trim().equalsIgnoreCase(surnameField.getText().trim())) {
 				found = true;
-			} else if (searchBySurnameField.getText().trim().equalsIgnoreCase(currentEmployee.getSurname().trim())) {
+			} else if (searchBySurnameField.getText().trim()
+					.equalsIgnoreCase(currentEmployee.getSurname().trim())) {
 				found = true;
 				displayRecords(currentEmployee);
 			} else {
 				nextRecord();
 				while (!firstSurname.trim().equalsIgnoreCase(currentEmployee.getSurname().trim())) {
-					if (searchBySurnameField.getText().trim().equalsIgnoreCase(currentEmployee.getSurname().trim())) {
+					if (searchBySurnameField.getText().trim()
+							.equalsIgnoreCase(currentEmployee.getSurname().trim())) {
 						found = true;
 						displayRecords(currentEmployee);
 						break;
@@ -706,7 +656,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			}
 		}
 		searchBySurnameField.setText("");
-	} // end searchEmployeeBySurname
+	}
 
 	public int getNextFreeId() {
 		int nextFreeId = 0;
@@ -717,13 +667,13 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			nextFreeId = currentEmployee.getEmployeeId() + 1;
 		}
 		return nextFreeId;
-	} // end getNextFreeId
+	}
 
 	public void addRecord(Employee newEmployee) {
 		fileManager.getApplication().openWriteFile(fileManager.getFile().getAbsolutePath());
 		currentByteStart = fileManager.getApplication().addRecords(newEmployee);
 		fileManager.getApplication().closeWriteFile();
-	} // end addRecord
+	}
 
 	private void deleteRecord() {
 		if (isSomeoneToDisplay()) {
@@ -739,14 +689,13 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 				}
 			}
 		}
-	} // end deleteDecord
+	}
 
 	private Vector<Object> getAllEmloyees() {
 		Vector<Object> allEmployee = new Vector<>();
 		Vector<Object> empDetails;
 		long byteStart = currentByteStart;
 		int firstId;
-
 		firstRecord();
 		firstId = currentEmployee.getEmployeeId();
 		do {
@@ -763,9 +712,8 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			nextRecord();
 		} while (firstId != currentEmployee.getEmployeeId());
 		currentByteStart = byteStart;
-
 		return allEmployee;
-	} // end getAllEmployees
+	}
 
 	private void editDetails() {
 		if (isSomeoneToDisplay()) {
@@ -773,12 +721,12 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			change = false;
 			setEnabled(true);
 		}
-	} // end editDetails
+	}
 
 	private void cancelChange() {
 		setEnabled(false);
 		displayRecords(currentEmployee);
-	} // end cancelChange
+	}
 
 	public boolean isSomeoneToDisplay() {
 		boolean someoneToDisplay;
@@ -798,13 +746,13 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			JOptionPane.showMessageDialog(this, "No Employees registered!");
 		}
 		return someoneToDisplay;
-	} // end isSomeoneToDisplay
+	}
 
 	private void displayEmployeeSummaryDialog() {
 		if (isSomeoneToDisplay()) {
 			new EmployeeSummaryDialog(getAllEmloyees());
 		}
-	} // end displayEmployeeSummaryDialog
+	}
 
 	public void setEnabled(boolean boolVal) {
 		boolean searchVal = !boolVal;
@@ -821,73 +769,75 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		searchBySurnameField.setEnabled(searchVal);
 		searchId.setEnabled(searchVal);
 		searchSurname.setEnabled(searchVal);
-	} // end setEnabled
+	}
 
-	// content pane for main dialog
 	private void createContentPane() {
 		setTitle("Employee Details");
 		JPanel dialog = new JPanel(new MigLayout());
-
-		setJMenuBar(menuBar());// add menu bar to frame
-		// add search panel to frame
+		setJMenuBar(menuBar());
 		dialog.add(searchPanel(), "width 400:400:400, growx, pushx");
-		// add navigation panel to frame
 		dialog.add(navigPanel(), "width 150:150:150, wrap");
-		// add button panel to frame
 		dialog.add(buttonPanel(), "growx, pushx, span 2,wrap");
-		// add details panel to frame
 		dialog.add(detailsPanel(), "gap top 30, gap left 150, center");
-
 		JScrollPane scrollPane = new JScrollPane(dialog);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
 		addWindowListener(this);
 		setSize(760, 600);
 		setLocation(250, 200);
-	} // end createContentPane
+	}
 
-	// create and show main dialog
 	private static void createAndShowGUI() {
-
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.createContentPane();// add content pane to frame
+		frame.createContentPane();
 		frame.setSize(760, 600);
 		frame.setLocation(250, 200);
+		frame.initCommands();
 		frame.setVisible(true);
-	}// end createAndShowGUI
+	}
 
-	// main method
+	private void initCommands() {
+		commandMap.put(first, new FirstRecordCommand(this));
+		commandMap.put(firstItem, new FirstRecordCommand(this));
+		commandMap.put(previous, new PreviousRecordCommand(this));
+		commandMap.put(prevItem, new PreviousRecordCommand(this));
+		commandMap.put(next, new NextRecordCommand(this));
+		commandMap.put(nextItem, new NextRecordCommand(this));
+		commandMap.put(last, new LastRecordCommand(this));
+		commandMap.put(lastItem, new LastRecordCommand(this));
+	}
+
 	public static void main(String args[]) {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				createAndShowGUI();
 			}
 		});
-	}// end main
+	}
 
 	public void changedUpdate(DocumentEvent d) {
 		change = true;
 		new JTextFieldLimit(20);
-	} // end changedUpdate
+	}
 
 	public void insertUpdate(DocumentEvent d) {
 		change = true;
 		new JTextFieldLimit(20);
-	} // end insertUpdate
+	}
 
 	public void removeUpdate(DocumentEvent d) {
 		change = true;
 		new JTextFieldLimit(20);
-	} // end removeUpdate
+	}
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		change = true;
-	} // end itemStateChanged
+	}
 
 	@Override
 	public void windowClosing(WindowEvent e) {
 		handleExitAction();
-	} // end windowClosing
+	}
 
 	@Override
 	public void windowActivated(WindowEvent e) {
@@ -912,4 +862,4 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 	@Override
 	public void windowOpened(WindowEvent e) {
 	}
-} // end class EmployeeDetails
+}
