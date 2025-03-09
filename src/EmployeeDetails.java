@@ -54,7 +54,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 	boolean changesMade = false;
 	private JMenuItem open, save, saveAs, create, modify, delete, firstItem, lastItem, nextItem, prevItem, searchById,
 			searchBySurname, listAll, closeApp;
-	private JButton first, previous, next, last, add, edit, deleteButton, displayAll, searchId, searchSurname,
+	public JButton first, previous, next, last, add, edit, deleteButton, displayAll, searchId, searchSurname,
 			saveChange, cancelChange;
 	private JComboBox<String> genderCombo, departmentCombo, fullTimeCombo;
 	private JTextField idField, ppsField, surnameField, firstNameField, salaryField;
@@ -67,9 +67,9 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 	String[] fullTime = { "", "Yes", "No" };
 	private Map<Object, Command> commandMap = new HashMap<>();
 
-    public FileManager getFileManager() {
-        return fileManager;
-    }
+	public FileManager getFileManager() {
+		return fileManager;
+	}
 
 	private JMenuBar menuBar() {
 		JMenuBar menuBar = new JMenuBar();
@@ -135,7 +135,6 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		searchPanel.add(searchId = new JButton("Go"), "width 35:35:35, height 20:20:20, growx, pushx, wrap");
 		searchId.addActionListener(this);
 		searchId.setToolTipText("Search Employee By ID");
-
 		searchPanel.add(new JLabel("Search by Surname:"), "growx, pushx");
 		searchPanel.add(searchBySurnameField = new JTextField(20), "width 200:200:200, growx, pushx");
 		searchBySurnameField.addActionListener(this);
@@ -143,38 +142,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		searchPanel.add(searchSurname = new JButton("Go"), "width 35:35:35, height 20:20:20, growx, pushx, wrap");
 		searchSurname.addActionListener(this);
 		searchSurname.setToolTipText("Search Employee By Surname");
-
 		return searchPanel;
-	}
-
-	private JPanel navigPanel() {
-		JPanel navigPanel = new JPanel();
-		navigPanel.setBorder(BorderFactory.createTitledBorder("Navigate"));
-		navigPanel.add(first = new JButton(new ImageIcon(
-				new ImageIcon("first.png").getImage().getScaledInstance(17, 17, java.awt.Image.SCALE_SMOOTH))));
-		first.setPreferredSize(new Dimension(17, 17));
-		first.addActionListener(this);
-		first.setToolTipText("Display first Record");
-
-		navigPanel.add(previous = new JButton(new ImageIcon(
-				new ImageIcon("prev.png").getImage().getScaledInstance(17, 17, java.awt.Image.SCALE_SMOOTH))));
-		previous.setPreferredSize(new Dimension(17, 17));
-		previous.addActionListener(this);
-		previous.setToolTipText("Display next Record");
-
-		navigPanel.add(next = new JButton(new ImageIcon(
-				new ImageIcon("next.png").getImage().getScaledInstance(17, 17, java.awt.Image.SCALE_SMOOTH))));
-		next.setPreferredSize(new Dimension(17, 17));
-		next.addActionListener(this);
-		next.setToolTipText("Display previous Record");
-
-		navigPanel.add(last = new JButton(new ImageIcon(
-				new ImageIcon("last.png").getImage().getScaledInstance(17, 17, java.awt.Image.SCALE_SMOOTH))));
-		last.setPreferredSize(new Dimension(17, 17));
-		last.addActionListener(this);
-		last.setToolTipText("Display last Record");
-
-		return navigPanel;
 	}
 
 	private JPanel buttonPanel() {
@@ -420,10 +388,15 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		if (((String) fullTimeCombo.getSelectedItem()).equalsIgnoreCase("Yes")) {
 			ft = true;
 		}
-		return new Employee(Integer.parseInt(idField.getText()), ppsField.getText().toUpperCase(),
-				surnameField.getText().toUpperCase(), firstNameField.getText().toUpperCase(),
-				genderCombo.getSelectedItem().toString().charAt(0), departmentCombo.getSelectedItem().toString(),
-				Double.parseDouble(salaryField.getText()), ft);
+		int id;
+		try {
+			id = Integer.parseInt(idField.getText().trim());
+		} catch (NumberFormatException nfe) {
+			id = getNextFreeId();
+		}
+		return new Employee(id, ppsField.getText().toUpperCase(), surnameField.getText().toUpperCase(),
+				firstNameField.getText().toUpperCase(), genderCombo.getSelectedItem().toString().charAt(0),
+				departmentCombo.getSelectedItem().toString(), Double.parseDouble(salaryField.getText()), ft);
 	}
 
 	public boolean checkFileName(File f) {
@@ -468,10 +441,12 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			ppsField.setBackground(new Color(255, 150, 150));
 			valid = false;
 		}
-		if (ppsField.isEditable() && correctPps(ppsField.getText().trim(), currentByteStart)) {
+		EmployeeValidator validator = new EmployeeValidator();
+		if (ppsField.isEditable() && !validator.isValidPps(ppsField.getText().trim())) {
 			ppsField.setBackground(new Color(255, 150, 150));
 			valid = false;
 		}
+
 		if (surnameField.isEditable() && surnameField.getText().trim().isEmpty()) {
 			surnameField.setBackground(new Color(255, 150, 150));
 			valid = false;
@@ -489,8 +464,8 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			valid = false;
 		}
 		try {
-			Double.parseDouble(salaryField.getText());
-			if (Double.parseDouble(salaryField.getText()) < 0) {
+			double sal = Double.parseDouble(salaryField.getText());
+			if (sal < 0) {
 				salaryField.setBackground(new Color(255, 150, 150));
 				valid = false;
 			}
@@ -513,16 +488,6 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		return valid;
 	}
 
-	private void setToWhite() {
-		ppsField.setBackground(UIManager.getColor("TextField.background"));
-		surnameField.setBackground(UIManager.getColor("TextField.background"));
-		firstNameField.setBackground(UIManager.getColor("TextField.background"));
-		salaryField.setBackground(UIManager.getColor("TextField.background"));
-		genderCombo.setBackground(UIManager.getColor("TextField.background"));
-		departmentCombo.setBackground(UIManager.getColor("TextField.background"));
-		fullTimeCombo.setBackground(UIManager.getColor("TextField.background"));
-	}
-
 	public boolean correctPps(String pps, long currentByte) {
 		boolean ppsExist = false;
 		if (pps.length() == 8 || pps.length() == 9) {
@@ -540,6 +505,16 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			ppsExist = true;
 		}
 		return ppsExist;
+	}
+
+	private void setToWhite() {
+		ppsField.setBackground(UIManager.getColor("TextField.background"));
+		surnameField.setBackground(UIManager.getColor("TextField.background"));
+		firstNameField.setBackground(UIManager.getColor("TextField.background"));
+		salaryField.setBackground(UIManager.getColor("TextField.background"));
+		genderCombo.setBackground(UIManager.getColor("TextField.background"));
+		departmentCombo.setBackground(UIManager.getColor("TextField.background"));
+		fullTimeCombo.setBackground(UIManager.getColor("TextField.background"));
 	}
 
 	public void firstRecord() {
@@ -634,15 +609,13 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			String firstSurname = currentEmployee.getSurname().trim();
 			if (searchBySurnameField.getText().trim().equalsIgnoreCase(surnameField.getText().trim())) {
 				found = true;
-			} else if (searchBySurnameField.getText().trim()
-					.equalsIgnoreCase(currentEmployee.getSurname().trim())) {
+			} else if (searchBySurnameField.getText().trim().equalsIgnoreCase(currentEmployee.getSurname().trim())) {
 				found = true;
 				displayRecords(currentEmployee);
 			} else {
 				nextRecord();
 				while (!firstSurname.trim().equalsIgnoreCase(currentEmployee.getSurname().trim())) {
-					if (searchBySurnameField.getText().trim()
-							.equalsIgnoreCase(currentEmployee.getSurname().trim())) {
+					if (searchBySurnameField.getText().trim().equalsIgnoreCase(currentEmployee.getSurname().trim())) {
 						found = true;
 						displayRecords(currentEmployee);
 						break;
@@ -776,7 +749,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		JPanel dialog = new JPanel(new MigLayout());
 		setJMenuBar(menuBar());
 		dialog.add(searchPanel(), "width 400:400:400, growx, pushx");
-		dialog.add(navigPanel(), "width 150:150:150, wrap");
+		dialog.add(new NavigationPanel(this), "width 150:150:150, wrap");
 		dialog.add(buttonPanel(), "growx, pushx, span 2,wrap");
 		dialog.add(detailsPanel(), "gap top 30, gap left 150, center");
 		JScrollPane scrollPane = new JScrollPane(dialog);
