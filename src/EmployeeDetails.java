@@ -66,9 +66,16 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 	String[] department = { "", "Administration", "Production", "Transport", "Management" };
 	String[] fullTime = { "", "Yes", "No" };
 	private Map<Object, Command> commandMap = new HashMap<>();
+	private EmployeeState currentState = new DisplayState(this);
 
 	public FileManager getFileManager() {
 		return fileManager;
+	}
+
+	private void setState(EmployeeState newState) {
+		if (currentState != null) currentState.exitState();
+		currentState = newState;
+		currentState.enterState();
 	}
 
 	private JMenuBar menuBar() {
@@ -181,7 +188,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		empDetails.add(new JLabel("Department:"), "growx, pushx");
 		empDetails.add(departmentCombo = new JComboBox<>(department), "growx, pushx, wrap");
 		empDetails.add(new JLabel("Salary:"), "growx, pushx");
-		empDetails.add(salaryField = new JTextField(20), "growx, pushx, wrap");
+		empDetails.add(setSalaryField(new JTextField(20)), "growx, pushx, wrap");
 		empDetails.add(new JLabel("Full Time:"), "growx, pushx");
 		empDetails.add(fullTimeCombo = new JComboBox<>(fullTime), "growx, pushx, wrap");
 		buttonPanel.add(saveChange = new JButton("Save"));
@@ -248,7 +255,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			firstNameField.setText(e.getFirstName());
 			genderCombo.setSelectedIndex(gCount);
 			departmentCombo.setSelectedIndex(dCount);
-			salaryField.setText(format.format(e.getSalary()));
+			getSalaryField().setText(format.format(e.getSalary()));
 			if (e.getFullTime()) {
 				fullTimeCombo.setSelectedIndex(1);
 			} else {
@@ -304,13 +311,13 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 
 	private void handleCreateRecordAction() {
 		if (checkInput() && !checkForChanges()) {
-			new AddRecordDialog(this);
+			setState(new AddState(this));
 		}
 	}
 
 	private void handleEditRecordAction() {
 		if (checkInput() && !checkForChanges()) {
-			editDetails();
+			setState(new EditState(this));
 		}
 	}
 
@@ -347,7 +354,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			if (checkInput() && !checkForChanges()) {
 			}
 		} else if (e.getSource() == cancelChange) {
-			cancelChange();
+			setState(new DisplayState(this));
 		} else if (e.getSource() == listAll || e.getSource() == displayAll) {
 			handleListAllAction();
 		} else if (e.getSource() == create || e.getSource() == add) {
@@ -396,7 +403,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		}
 		return new Employee(id, ppsField.getText().toUpperCase(), surnameField.getText().toUpperCase(),
 				firstNameField.getText().toUpperCase(), genderCombo.getSelectedItem().toString().charAt(0),
-				departmentCombo.getSelectedItem().toString(), Double.parseDouble(salaryField.getText()), ft);
+				departmentCombo.getSelectedItem().toString(), Double.parseDouble(getSalaryField().getText()), ft);
 	}
 
 	public boolean checkFileName(File f) {
@@ -446,7 +453,6 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			ppsField.setBackground(new Color(255, 150, 150));
 			valid = false;
 		}
-
 		if (surnameField.isEditable() && surnameField.getText().trim().isEmpty()) {
 			surnameField.setBackground(new Color(255, 150, 150));
 			valid = false;
@@ -464,14 +470,14 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			valid = false;
 		}
 		try {
-			double sal = Double.parseDouble(salaryField.getText());
+			double sal = Double.parseDouble(getSalaryField().getText());
 			if (sal < 0) {
-				salaryField.setBackground(new Color(255, 150, 150));
+				getSalaryField().setBackground(new Color(255, 150, 150));
 				valid = false;
 			}
 		} catch (NumberFormatException num) {
-			if (salaryField.isEditable()) {
-				salaryField.setBackground(new Color(255, 150, 150));
+			if (getSalaryField().isEditable()) {
+				getSalaryField().setBackground(new Color(255, 150, 150));
 				valid = false;
 			}
 		}
@@ -511,7 +517,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		ppsField.setBackground(UIManager.getColor("TextField.background"));
 		surnameField.setBackground(UIManager.getColor("TextField.background"));
 		firstNameField.setBackground(UIManager.getColor("TextField.background"));
-		salaryField.setBackground(UIManager.getColor("TextField.background"));
+		getSalaryField().setBackground(UIManager.getColor("TextField.background"));
 		genderCombo.setBackground(UIManager.getColor("TextField.background"));
 		departmentCombo.setBackground(UIManager.getColor("TextField.background"));
 		fullTimeCombo.setBackground(UIManager.getColor("TextField.background"));
@@ -690,7 +696,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 
 	private void editDetails() {
 		if (isSomeoneToDisplay()) {
-			salaryField.setText(fieldFormat.format(currentEmployee.getSalary()));
+			getSalaryField().setText(fieldFormat.format(currentEmployee.getSalary()));
 			change = false;
 			setEnabled(true);
 		}
@@ -712,7 +718,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 			ppsField.setText("");
 			surnameField.setText("");
 			firstNameField.setText("");
-			salaryField.setText("");
+			getSalaryField().setText("");
 			genderCombo.setSelectedIndex(0);
 			departmentCombo.setSelectedIndex(0);
 			fullTimeCombo.setSelectedIndex(0);
@@ -734,7 +740,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		firstNameField.setEditable(boolVal);
 		genderCombo.setEnabled(boolVal);
 		departmentCombo.setEnabled(boolVal);
-		salaryField.setEditable(boolVal);
+		getSalaryField().setEditable(boolVal);
 		fullTimeCombo.setEnabled(boolVal);
 		saveChange.setVisible(boolVal);
 		cancelChange.setVisible(boolVal);
@@ -787,6 +793,10 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 		});
 	}
 
+	public void setChange(boolean newVal) {
+	    this.change = newVal;
+	}
+	
 	public void changedUpdate(DocumentEvent d) {
 		change = true;
 		new JTextFieldLimit(20);
@@ -834,5 +844,14 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 
 	@Override
 	public void windowOpened(WindowEvent e) {
+	}
+
+	public JTextField getSalaryField() {
+		return salaryField;
+	}
+
+	public JTextField setSalaryField(JTextField salaryField) {
+		this.salaryField = salaryField;
+		return salaryField;
 	}
 }
